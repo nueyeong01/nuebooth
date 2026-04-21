@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>nuebooth - Quality Optimized</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+HK:wght@400;500;600;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ECE7D8;
+            font-family: 'Noto Serif HK', serif;
+            font-weight: 500;
+            overflow: hidden; 
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #landing-page {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .booth-exterior-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: fit-content;
+            max-width: 90vw;
+        }
+
+        #booth-image {
+            max-width: 100%;
+            max-height: 65vh;
+            display: block;
+            object-fit: contain;
+        }
+
+        .btn-style {
+            padding: 6px 20px; 
+            font-size: 0.85rem; 
+            font-weight: 600;
+            color: black; 
+            background-color: white; 
+            border: 1.5px solid black; 
+            border-radius: 9999px; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Noto Serif HK', serif;
+        }
+
+        #enter-btn {
+            position: absolute;
+            bottom: 31%; 
+            left: 47%;   
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        #contact-link {
+            position: absolute;
+            bottom: -5%;
+            left: 50%; 
+            transform: translateX(-50%); 
+            font-family: 'Noto Serif HK', serif;
+            font-weight: 900; 
+            font-size: 0.66rem; 
+            color: #4B5563; 
+            text-decoration: none;
+            transition: opacity 0.2s;
+            z-index: 110;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) { #contact-link { font-size: 0.5rem; } }
+        #contact-link:hover { opacity: 0.7; }
+
+        .page-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background-color: #ECE7D8;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-nav-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: black;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 200;
+            font-family: 'Noto Serif HK', serif;
+        }
+
+        .responsive-scaler {
+            display: flex;
+            flex-direction: row; 
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            gap: 40px;
+        }
+
+        .photo-strip-section {
+            width: 110px; 
+            background: black;
+            display: flex;
+            flex-direction: column;
+            padding: 4px;
+            gap: 4px;
+            flex-shrink: 0;
+            transition: width 0.3s ease, grid 0.3s ease;
+            position: relative;
+        }
+
+        .photo-strip-section.layout-2x2 {
+            width: 200px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .photo-slot {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background-color: #333;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+
+        .camera-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .camera-section {
+            position: relative;
+            width: 320px;
+            aspect-ratio: 3/4;
+            background: #000;
+            border: 2px solid black;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #video-feed { width: 100%; height: 100%; object-fit: cover; }
+
+        .button-row-stable {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        @media (max-width: 640px) {
+            .responsive-scaler { transform: scale(0.8); transform-origin: center center; gap: 20px; }
+        }
+        @media (max-width: 480px) { .responsive-scaler { transform: scale(0.7); } }
+
+        .btn-pop-anim { animation: btnPop 0.3s ease-out forwards; }
+        @keyframes btnPop {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.25); }
+            100% { transform: translateX(-50%) scale(1.1); }
+        }
+        .btn-pop-simple-anim { animation: btnPopSimple 0.3s ease-out forwards; }
+        @keyframes btnPopSimple {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1.1); }
+        }
+
+        #flash-overlay { 
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background:white; opacity:0; pointer-events:none; z-index:120; 
+            will-change: opacity;
+        }
+        #countdown { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; color:white; text-shadow:0 0 15px rgba(0,0,0,0.8); z-index:110; display:none; }
+        #switch-camera-btn { position:absolute; top:10px; right:10px; width:30px; height:30px; background:black; border-radius:50%; display:none; justify-content:center; align-items:center; z-index:130; cursor: pointer; }
+        #switch-camera-btn svg { width:16px; height:16px; fill:white; }
+
+        .opt-btn {
+            position: relative; flex: 1; padding: 6px; border: 1.5px solid black; border-radius: 6px; background: white;
+            font-family: 'Noto Serif HK', serif; font-weight: 500; font-size: 0.75rem; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .opt-btn.active { background: black; color: white; }
+        .opt-btn.disabled { cursor: not-allowed; color: #ccc; border-color: #ccc; }
+
+        .option-title { font-family: 'Noto Serif HK', serif; font-weight: 900; font-size: 0.95rem; color: #333; }
+        .edit-controls { display: flex; flex-direction: column; gap: 14px; width: 180px; }
+
+        .frame-white { background: white !important; color: black; border: none !important; }
+        .frame-black { background: black !important; color: white; border: none !important; }
+
+        .decor-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+        .decor-bday.layout-1x4 .decor-layer { display: block; background-image: url('bday14.png'); }
+        .decor-bday.layout-2x2 .decor-layer { display: block; background-image: url('bday22.png'); }
+        .decor-spring.layout-1x4 .decor-layer { display: block; background-image: url('spring14.png'); }
+        .decor-spring.layout-2x2 .decor-layer { display: block; background-image: url('spring22.png'); }
+
+        .filter-bw img { filter: grayscale(100%); }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <div class="booth-exterior-wrapper">
+            <img src="home1.png" alt="Photo Booth Exterior" id="booth-image">
+            <button id="enter-btn" class="btn-style">Enter</button>
+            <a href="https://www.instagram.com/nueyeong01" target="_blank" id="contact-link">Contact @nueyeong01</a>
+        </div>
+    </div>
+
+    <div id="photo-page" class="page-container">
+        <button id="back-btn" class="back-nav-btn">Back to home</button>
+        <div class="responsive-scaler">
+            <div class="photo-strip-section" id="photo-list" style="border: 1px solid black;">
+                <div class="photo-slot"></div><div class="photo-slot"></div><div class="photo-slot"></div><div class="photo-slot"></div>
+            </div>
+            <div class="camera-column">
+                <div class="camera-section">
+                    <video id="video-feed" autoplay playsinline></video>
+                    <button id="switch-camera-btn">
+                        <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                    </button>
+                    <div id="flash-overlay"></div>
+                    <div id="countdown"></div>
+                </div>
+                <div class="button-row-stable">
+                    <button id="start-btn" class="btn-style">Start</button>
+                    <button id="restart-btn" class="btn-style" style="display: none;">Again</button>
+                    <button id="done-btn" class="btn-style" style="display: none;">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-page" class="page-container">
+        <button id="edit-back-btn" class="back-nav-btn">Back to the previous step</button>
+        <div class="responsive-scaler">
+            <div class="photo-strip-section frame-black" id="edit-photo-list">
+                <div class="decor-layer"></div>
+            </div>
+            <div class="edit-controls">
+                <div class="option-group flex flex-col gap-2">
+                    <div class="option-title">Layout</div>
+                    <div class="flex gap-1">
+                        <button class="opt-btn active" id="btn-layout-1x4">1x4</button>
+                        <button class="opt-btn" id="btn-layout-2x2">2x2</button>
+                    </div>
+                </div>
+                <div class="option-group flex flex-col gap-2">
+                    <div class="option-title">Filter</div>
+                    <div class="flex gap-1">
+                        <button class="opt-btn active" id="btn-color">Color</button>
+                        <button class="opt-btn" id="btn-bw">B&W</button>
+                    </div>
+                </div>
+                <div class="option-group flex flex-col gap-2">
+                    <div class="option-title">Frame</div>
+                    <div class="flex gap-1">
+                        <button class="opt-btn active" id="btn-frame-black">Black</button>
+                        <button class="opt-btn" id="btn-frame-white">White</button>
+                    </div>
+                </div>
+                <div class="option-group flex flex-col gap-2">
+                    <div class="option-title">Decor</div>
+                    <div class="flex gap-1">
+                        <button class="opt-btn active" id="btn-decor-none">None</button>
+                        <button class="opt-btn" id="btn-decor-bday">Bday</button>
+                        <button class="opt-btn" id="btn-decor-spring">Spring</button>
+                    </div>
+                </div>
+                <div class="button-row-stable" style="height: auto; margin-top: 4px;">
+                    <button id="home-btn" class="btn-style w-full">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="hidden-canvas" style="display:none;"></canvas>
+
+    <script>
+        const pngSettings = { oneByFour: { width: 1080 }, twoByTwo: { width: 1600 } };
+        
+        const downloadImage = (canvas, filename) => {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL("image/jpeg", 0.9); 
+            link.click();
+        };
+
+        const landingPage = document.getElementById('landing-page');
+        const photoPage = document.getElementById('photo-page');
+        const editPage = document.getElementById('edit-page');
+        const enterBtn = document.getElementById('enter-btn');
+        const backBtn = document.getElementById('back-btn');
+        const editBackBtn = document.getElementById('edit-back-btn');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const doneBtn = document.getElementById('done-btn');
+        const homeBtn = document.getElementById('home-btn');
+        const switchCameraBtn = document.getElementById('switch-camera-btn');
+        const video = document.getElementById('video-feed');
+        const canvas = document.getElementById('hidden-canvas');
+        const photoList = document.getElementById('photo-list');
+        const editPhotoList = document.getElementById('edit-photo-list');
+        const flashOverlay = document.getElementById('flash-overlay');
+        const countdownEl = document.getElementById('countdown');
+
+        let capturedPhotos = [];
+        const maxPhotos = 4;
+        let currentFilter = 'color';
+        let currentFrame = 'black'; 
+        let currentLayout = '1x4';
+        let currentDecor = 'none'; 
+        let currentFacingMode = 'user';
+
+        const stopCamera = () => { if (video.srcObject) { video.srcObject.getTracks().forEach(track => track.stop()); video.srcObject = null; } };
+
+        // 카메라 개수 확인 후 전환 버튼 표시 여부 결정
+        const checkCameraCount = async () => {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                switchCameraBtn.style.display = videoDevices.length >= 2 ? 'flex' : 'none';
+            } catch (err) {}
+        };
+
+        const startCamera = async () => {
+            stopCamera();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: { ideal: currentFacingMode }, aspectRatio: 0.75, width: { ideal: 1080 } }
+                });
+                video.srcObject = stream;
+                const actualMode = stream.getVideoTracks()[0].getSettings().facingMode || currentFacingMode;
+                video.style.transform = actualMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+                
+                // 카메라 개수 확인 호출
+                checkCameraCount();
+            } catch (err) { console.error(err); }
+        };
+
+        enterBtn.addEventListener('click', () => {
+            enterBtn.classList.add('btn-pop-anim');
+            setTimeout(async () => {
+                enterBtn.classList.remove('btn-pop-anim');
+                landingPage.style.display = 'none';
+                photoPage.style.display = 'flex';
+                await startCamera();
+            }, 250);
+        });
+
+        startBtn.addEventListener('click', () => { 
+            startBtn.classList.add('btn-pop-simple-anim');
+            setTimeout(() => {
+                startBtn.classList.remove('btn-pop-simple-anim');
+                startBtn.style.display = 'none'; 
+                takePhotoSequence(); 
+            }, 250);
+        });
+
+        async function takePhotoSequence() {
+            capturedPhotos = [];
+            photoList.querySelectorAll('.photo-slot').forEach(s => s.innerHTML = '');
+            for (let i = 0; i < maxPhotos; i++) {
+                countdownEl.style.display = 'block';
+                for (let count = 3; count > 0; count--) { countdownEl.innerText = count; await new Promise(r => setTimeout(r, 800)); }
+                countdownEl.style.display = 'none';
+                capture();
+                await new Promise(r => setTimeout(r, 800));
+            }
+            restartBtn.style.display = 'block'; doneBtn.style.display = 'block';
+        }
+
+        function capture() {
+            flashOverlay.style.transition = 'none';
+            flashOverlay.style.opacity = '1';
+            setTimeout(() => {
+                flashOverlay.style.transition = 'opacity 0.4s ease-out';
+                flashOverlay.style.opacity = '0';
+            }, 50);
+
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (video.style.transform.includes('scaleX(-1)')) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/png');
+            capturedPhotos.push(dataUrl);
+            const img = document.createElement('img'); img.src = dataUrl;
+            photoList.querySelectorAll('.photo-slot')[capturedPhotos.length - 1].appendChild(img);
+        }
+
+        doneBtn.addEventListener('click', () => {
+            photoPage.style.display = 'none'; editPage.style.display = 'flex';
+            const slots = editPhotoList.querySelectorAll('.photo-slot');
+            slots.forEach(s => s.remove());
+            capturedPhotos.forEach(src => {
+                const slot = document.createElement('div'); slot.className = 'photo-slot';
+                const img = document.createElement('img'); img.src = src;
+                slot.appendChild(img); editPhotoList.appendChild(slot);
+            });
+            updateLayoutUI();
+        });
+
+        const updateLayoutUI = () => {
+            editPhotoList.classList.toggle('layout-2x2', currentLayout === '2x2');
+            editPhotoList.classList.toggle('layout-1x4', currentLayout === '1x4');
+            document.getElementById('btn-layout-1x4').classList.toggle('active', currentLayout === '1x4');
+            document.getElementById('btn-layout-2x2').classList.toggle('active', currentLayout === '2x2');
+            updateDecorUI();
+        };
+
+        document.getElementById('btn-layout-1x4').onclick = () => { currentLayout = '1x4'; updateLayoutUI(); };
+        document.getElementById('btn-layout-2x2').onclick = () => { currentLayout = '2x2'; updateLayoutUI(); };
+        
+        const setFilter = (f) => {
+            currentFilter = f;
+            editPhotoList.classList.remove('filter-bw');
+            if (f !== 'color') editPhotoList.classList.add(`filter-${f}`);
+            document.getElementById('btn-color').classList.toggle('active', f === 'color');
+            document.getElementById('btn-bw').classList.toggle('active', f === 'bw');
+        };
+
+        document.getElementById('btn-color').onclick = () => setFilter('color');
+        document.getElementById('btn-bw').onclick = () => setFilter('bw');
+
+        const updateFrameUI = (frameName) => {
+            currentFrame = frameName;
+            editPhotoList.classList.remove('frame-white', 'frame-black');
+            editPhotoList.classList.add(`frame-${frameName}`);
+            document.getElementById('btn-frame-black').classList.toggle('active', frameName === 'black');
+            document.getElementById('btn-frame-white').classList.toggle('active', frameName === 'white');
+        };
+
+        document.getElementById('btn-frame-black').onclick = () => updateFrameUI('black');
+        document.getElementById('btn-frame-white').onclick = () => updateFrameUI('white');
+
+        const updateDecorUI = () => {
+            editPhotoList.classList.remove('decor-bday', 'decor-spring');
+            if (currentDecor !== 'none') editPhotoList.classList.add(`decor-${currentDecor}`);
+            document.getElementById('btn-decor-none').classList.toggle('active', currentDecor === 'none');
+            document.getElementById('btn-decor-bday').classList.toggle('active', currentDecor === 'bday');
+            document.getElementById('btn-decor-spring').classList.toggle('active', currentDecor === 'spring');
+        };
+
+        document.getElementById('btn-decor-none').onclick = () => { currentDecor = 'none'; updateDecorUI(); };
+        document.getElementById('btn-decor-bday').onclick = () => { currentDecor = 'bday'; updateDecorUI(); };
+        document.getElementById('btn-decor-spring').onclick = () => { currentDecor = 'spring'; updateDecorUI(); };
+
+        homeBtn.onclick = () => {
+            const resultCanvas = document.createElement('canvas');
+            const ctx = resultCanvas.getContext('2d');
+            let tw, th, padding, gap, iw, ih;
+
+            if (currentLayout === '1x4') {
+                tw = pngSettings.oneByFour.width;
+                padding = tw * 0.02; gap = tw * 0.01;
+                iw = tw - (padding * 2); ih = Math.round(iw * 4 / 3); 
+                th = (ih * 4) + (gap * 3) + (padding * 2);
+            } else {
+                tw = pngSettings.twoByTwo.width;
+                padding = tw * 0.015; gap = tw * 0.01;
+                iw = (tw - (padding * 2) - gap) / 2; ih = Math.round(iw * 4 / 3);
+                th = (ih * 2) + gap + (padding * 2);
+            }
+
+            resultCanvas.width = tw; resultCanvas.height = th;
+            ctx.fillStyle = (currentFrame === 'white') ? '#ffffff' : '#000000';
+            ctx.fillRect(0, 0, tw, th);
+
+            const drawPhotos = (callback) => {
+                let loaded = 0;
+                capturedPhotos.forEach((src, idx) => {
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.onload = () => {
+                        let x, y;
+                        if (currentLayout === '1x4') { x = padding; y = padding + idx * (ih + gap); } 
+                        else { x = padding + (idx % 2) * (iw + gap); y = padding + Math.floor(idx / 2) * (ih + gap); }
+
+                        const rawW = img.naturalWidth || img.width;
+                        const rawH = img.naturalHeight || img.height;
+                        const targetAspect = iw / ih;
+                        let sw, sh, sx, sy;
+
+                        if (rawW / rawH > targetAspect) { sw = rawH * targetAspect; sh = rawH; sx = (rawW - sw) / 2; sy = 0; } 
+                        else { sw = rawW; sh = rawW / targetAspect; sx = 0; sy = (rawH - sh) / 2; }
+
+                        ctx.drawImage(img, sx, sy, sw, sh, x, y, iw, ih);
+
+                        if (currentFilter === 'bw') {
+                            const imgData = ctx.getImageData(x, y, iw, ih);
+                            const data = imgData.data;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const avg = data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114;
+                                data[i] = data[i+1] = data[i+2] = avg;
+                            }
+                            ctx.putImageData(imgData, x, y);
+                        }
+                        if (++loaded === 4) callback();
+                    };
+                    img.src = src;
+                });
+            };
+
+            const finalize = () => {
+                const randomId = Math.floor(Math.random() * 900) + 100;
+                downloadImage(resultCanvas, `nuebooth_${randomId}.jpg`);
+            };
+
+            drawPhotos(() => {
+                if (currentDecor !== 'none') {
+                    const decorImg = new Image();
+                    decorImg.onload = () => { ctx.drawImage(decorImg, 0, 0, tw, th); finalize(); };
+                    if (currentDecor === 'bday') {
+                        decorImg.src = (currentLayout === '1x4') ? 'bday14.png' : 'bday22.png';
+                    } else if (currentDecor === 'spring') {
+                        decorImg.src = (currentLayout === '1x4') ? 'spring14.png' : 'spring22.png';
+                    }
+                } else {
+                    finalize();
+                }
+            });
+        };
+
+        backBtn.onclick = () => { stopCamera(); landingPage.style.display = 'flex'; photoPage.style.display = 'none'; };
+        editBackBtn.onclick = () => { editPage.style.display = 'none'; photoPage.style.display = 'flex'; startCamera(); };
+        switchCameraBtn.onclick = () => { currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user'; startCamera(); };
+        restartBtn.onclick = () => { capturedPhotos = []; photoList.querySelectorAll('.photo-slot').forEach(s => s.innerHTML = ''); restartBtn.style.display = 'none'; doneBtn.style.display = 'none'; startBtn.style.display = 'block'; };
+    </script>
+</body>
+</html>
