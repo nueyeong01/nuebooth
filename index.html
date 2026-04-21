@@ -109,7 +109,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            z-index: 200;
+            z-index: 500; /* 항상 다른 요소보다 위에 보이도록 설정 */
             font-family: 'Noto Serif HK', serif;
         }
 
@@ -356,10 +356,10 @@
         let currentLayout = '1x4';
         let currentDecor = 'none'; 
         let currentFacingMode = 'user';
+        let isTakingPhotos = false; // 촬영 루프 중복 실행을 막는 중요한 플래그
 
         const stopCamera = () => { if (video.srcObject) { video.srcObject.getTracks().forEach(track => track.stop()); video.srcObject = null; } };
 
-        // 카메라 개수 확인 후 전환 버튼 표시 여부 결정
         const checkCameraCount = async () => {
             try {
                 const devices = await navigator.mediaDevices.enumerateDevices();
@@ -377,8 +377,6 @@
                 video.srcObject = stream;
                 const actualMode = stream.getVideoTracks()[0].getSettings().facingMode || currentFacingMode;
                 video.style.transform = actualMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
-                
-                // 카메라 개수 확인 호출
                 checkCameraCount();
             } catch (err) { console.error(err); }
         };
@@ -389,11 +387,16 @@
                 enterBtn.classList.remove('btn-pop-anim');
                 landingPage.style.display = 'none';
                 photoPage.style.display = 'flex';
+                // 진입 시 버튼 상태 초기화
+                startBtn.style.display = 'block';
+                restartBtn.style.display = 'none';
+                doneBtn.style.display = 'none';
                 await startCamera();
             }, 250);
         });
 
         startBtn.addEventListener('click', () => { 
+            if (isTakingPhotos) return; 
             startBtn.classList.add('btn-pop-simple-anim');
             setTimeout(() => {
                 startBtn.classList.remove('btn-pop-simple-anim');
@@ -403,38 +406,68 @@
         });
 
         async function takePhotoSequence() {
+            if (isTakingPhotos) return;
+            isTakingPhotos = true;
             capturedPhotos = [];
             photoList.querySelectorAll('.photo-slot').forEach(s => s.innerHTML = '');
+            
             for (let i = 0; i < maxPhotos; i++) {
+                if (!isTakingPhotos) break; // 촬영 중 중단될 경우 루프 탈출
+                
                 countdownEl.style.display = 'block';
-                for (let count = 3; count > 0; count--) { countdownEl.innerText = count; await new Promise(r => setTimeout(r, 800)); }
+                for (let count = 3; count > 0; count--) { 
+                    if (!isTakingPhotos) break;
+                    countdownEl.innerText = count; 
+                    await new Promise(r => setTimeout(r, 800)); 
+                }
+                if (!isTakingPhotos) break;
                 countdownEl.style.display = 'none';
                 capture();
                 await new Promise(r => setTimeout(r, 800));
             }
-            restartBtn.style.display = 'block'; doneBtn.style.display = 'block';
+            
+            if (isTakingPhotos) {
+                restartBtn.style.display = 'block'; 
+                doneBtn.style.display = 'block';
+                isTakingPhotos = false; // 루프 완료 후 상태 해제
+            }
         }
 
         function capture() {
-            flashOverlay.style.transition = 'none';
-            flashOverlay.style.opacity = '1';
-            setTimeout(() => {
-                flashOverlay.style.transition = 'opacity 0.4s ease-out';
-                flashOverlay.style.opacity = '0';
-            }, 50);
+            try {
+                flashOverlay.style.transition = 'none';
+                flashOverlay.style.opacity = '1';
+                setTimeout(() => {
+                    flashOverlay.style.transition = 'opacity 0.4s ease-out';
+                    flashOverlay.style.opacity = '0';
+                }, 50);
 
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            if (video.style.transform.includes('scaleX(-1)')) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL('image/png');
-            capturedPhotos.push(dataUrl);
-            const img = document.createElement('img'); img.src = dataUrl;
-            photoList.querySelectorAll('.photo-slot')[capturedPhotos.length - 1].appendChild(img);
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (video.style.transform.includes('scaleX(-1)')) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                if (capturedPhotos.length < maxPhotos) {
+                    capturedPhotos.push(dataUrl);
+                    const slots = photoList.querySelectorAll('.photo-slot');
+                    const currentIdx = capturedPhotos.length - 1;
+                    if (slots[currentIdx]) {
+                        const img = document.createElement('img'); 
+                        img.src = dataUrl;
+                        slots[currentIdx].appendChild(img);
+                    }
+                }
+            } catch (e) {
+                console.error("Capture Error:", e);
+                isTakingPhotos = false;
+            }
         }
 
         doneBtn.addEventListener('click', () => {
-            photoPage.style.display = 'none'; editPage.style.display = 'flex';
+            if (isTakingPhotos) return;
+            photoPage.style.display = 'none'; 
+            editPage.style.display = 'flex';
             const slots = editPhotoList.querySelectorAll('.photo-slot');
             slots.forEach(s => s.remove());
             capturedPhotos.forEach(src => {
@@ -566,10 +599,39 @@
             });
         };
 
-        backBtn.onclick = () => { stopCamera(); landingPage.style.display = 'flex'; photoPage.style.display = 'none'; };
-        editBackBtn.onclick = () => { editPage.style.display = 'none'; photoPage.style.display = 'flex'; startCamera(); };
-        switchCameraBtn.onclick = () => { currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user'; startCamera(); };
-        restartBtn.onclick = () => { capturedPhotos = []; photoList.querySelectorAll('.photo-slot').forEach(s => s.innerHTML = ''); restartBtn.style.display = 'none'; doneBtn.style.display = 'none'; startBtn.style.display = 'block'; };
+        backBtn.onclick = () => { 
+            isTakingPhotos = false;
+            stopCamera(); 
+            landingPage.style.display = 'flex'; 
+            photoPage.style.display = 'none'; 
+        };
+        
+        editBackBtn.onclick = () => { 
+            isTakingPhotos = false; 
+            editPage.style.display = 'none'; 
+            photoPage.style.display = 'flex'; 
+            // 버튼 상태 완전 리셋
+            startBtn.style.display = 'block';
+            restartBtn.style.display = 'none';
+            doneBtn.style.display = 'none';
+            photoList.querySelectorAll('.photo-slot').forEach(s => s.innerHTML = '');
+            startCamera(); 
+        };
+        
+        switchCameraBtn.onclick = () => { 
+            if (isTakingPhotos) return;
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user'; 
+            startCamera(); 
+        };
+
+        restartBtn.onclick = () => { 
+            if (isTakingPhotos) return;
+            capturedPhotos = []; 
+            photoList.querySelectorAll('.photo-slot').forEach(s => s.innerHTML = ''); 
+            restartBtn.style.display = 'none'; 
+            doneBtn.style.display = 'none'; 
+            startBtn.style.display = 'block'; 
+        };
     </script>
 </body>
 </html>
